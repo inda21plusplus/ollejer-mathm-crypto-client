@@ -30,7 +30,9 @@ def write_command(sock, private_key, shared_key):
         d = {
             "nonce": private_nonce,
             "filedata": b64_encrypted_data}
-
+        d2 = json.dumps(d).encode('utf8')
+        
+        d2 = base64.b64encode(d2).decode('utf-8')
     nonce = base64.b64encode(cipher.nonce).decode('utf-8')
     signature = base64.b64encode(HMAC.new(private_key, msg=file_name.encode('utf8'), digestmod=SHA256).digest()).decode('utf-8')
         
@@ -39,8 +41,9 @@ def write_command(sock, private_key, shared_key):
     data_set = {"type": "write",
                 "id": file_name,
                 "signature": signature,
-                "data": base64.b64encode(json.dumps(d)).decode('utf-8')}
+                "data": d2}
     
+    print(data_set)
     _json = json.dumps(data_set)
     nonce_rfc7539 = get_random_bytes(12)
     cipher = ChaCha20_Poly1305.new(key=shared_key, nonce=nonce_rfc7539)
@@ -87,7 +90,7 @@ def read(file_name, shared_key, private_key, sock, sockfile):
         cipher = ChaCha20.new(key=private_key, nonce=nonce)
         decrypted_data = cipher.decrypt(encrypted_file_data)
     
-        with open("output.txt", "wb") as file:
+        with open("output2.txt", "wb") as file:
             print(0)
             file.write(decrypted_data)
 
@@ -158,8 +161,9 @@ def get_key(b64str):
 
 def main():
     # Socket
-    address = "2.tcp.ngrok.io"
-    port = 14520
+    
+    address = socket.gethostbyname(socket.gethostname())
+    port = 10000
     sock, sockfile = setup_socket(address, port, nonblocking=False)
 
     # Key exchange with RSA

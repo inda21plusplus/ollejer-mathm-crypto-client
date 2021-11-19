@@ -16,4 +16,4 @@
 - Har privat Signeringsnyckel och Dekrypteringsnyckel
 
 
-- Server har keyn
+- Server
